@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <title>js-web-project</title>
+  <body>
+    <noscript>
+      You need to enable JavaScript to run this app.
+    </noscript>
+    <h1>Welcome to our network!</h1>
+    <p>Please fill out the following fields:</p>
+    <p>
+      Name:
+      <input type="text" id="name">
+    </p>
+    <p>
+      Age:
+      <input type="number" id="age">
+    </p>
+    <p>
+      Profile Image:
+      <input type="file" id="profileImage">
+    </p>
+    <hr />
+    <h1 id="nameDisplay">Your Name</h1>
+    <h2 id="ageDisplay">Your Age</h2>
+    <img id="imageDisplay" src="https://i.stack.imgur.com/34AD2.jpg" width="200" />
+    <script type="text/javascript">
+      (async () => {
+        'use strict';
+        const NAME_ID = 'name';
+        const AGE_ID = 'age';
+        const IMG_ID = 'profileImage';
+        const nameSelector = document.getElementById(NAME_ID);
+        const ageSelector = document.getElementById(AGE_ID);
+        const imageSelector = document.getElementById(IMG_ID);
+        const personInput = {
+          name: null,
+          age: null,
+          profileImage: null
+        };
+        function createRequest(key, value) {
+          fetch(`http://localhost:3000/createProfile?${key}=${value}`);
+        }
+        nameSelector.addEventListener('keyup', function(e) {
+          personInput.name = e.target.value;
+          createRequest('name', personInput.name);
+          updateUI(personInput);
+        });
+        ageSelector.addEventListener('keyup', function(e) {
+          personInput.age = e.target.value;
+          createRequest('age', personInput.age);
+          updateUI(personInput);
+        });
+        imageSelector.addEventListener('change', function(e) {
+          for (let i = 0; i < this.files.length; i++) {
+            const file = this.files[i];
+            if (!file.type.startsWith('image/')){ continue }
+            const reader = new FileReader();
+            reader.onload = (function() {
+              return function(e) {
+                personInput.profileImage = e.target.result;
+                createRequest('profileImage', personInput.profileImage);
+                updateUI(personInput);
+              }
+            })();
+            reader.readAsDataURL(file);
+          }
+        });
+        function updateUI(personInput) {
+          if (personInput.name) document.getElementById('nameDisplay').textContent = personInput.name;
+          if (personInput.age) document.getElementById('ageDisplay').textContent = personInput.age;
+          if (personInput.profileImage) document.getElementById('imageDisplay').src = personInput.profileImage;
+        }
+        try {
+          const data = await fetch(`http://localhost:3000/profile`);
+          updateUI(await data.json());
+        }
+        catch (error) {
+          console.error(error);
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <title>js-web-project</title>
+  <body>
+    <noscript>
+      You need to enable JavaScript to run this app.
+    </noscript>
+    <h1>Posts</h1>
+    <input id="addPostInput"></input>
+    <button id="addPostButton">Post...</button>
+    <div id="posts"></div>
+    <script type="text/javascript">
+      let postInput = '';
+
+      document.getElementById('addPostInput').addEventListener('keyup', (e) => {
+        postInput = e.target.value;
+      });
+
+      document.getElementById('addPostButton').addEventListener('click', async () => {
+        try {
+          console.log('clicked add post', postInput);
+          await addPost(postInput);
+          postInput = '';
+          document.getElementById('addPostInput').value = '';
+          await getPosts();
+        }
+        catch (error) {
+          console.error(error);
+        }
+      });
+
+      async function addPost(postContent) {
+        try {
+          await fetch(`http://localhost:3000/post?userId=_0tqiayl7r&post=${encodeURIComponent(postContent)}`);
+        }
+        catch (error) {
+          console.error(error);
+        }
+      }
+
+      async function getPosts() {
+        try {
+          const postsFetch = await fetch('http://localhost:3000/getPosts');
+          const posts = await postsFetch.json();
+          console.log(posts);
+
+          let postsHtml = '';
+
+          for (let post of posts.posts) {
+            postsHtml += `<p>${post.content}</p>`;
+          }
+
+          console.log(postsHtml);
+
+          document.getElementById('posts').innerHTML = postsHtml;
+        }
+        catch (error) {
+          console.error(error);
+        }
+      }
+
+      getPosts();
+    </script>
+  </body>
+</html>
